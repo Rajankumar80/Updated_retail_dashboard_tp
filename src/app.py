@@ -403,7 +403,27 @@ def update_camera_status(cam_id):
     gc.collect()
     return jsonify({"success": True})
 
-
+@app.route('/api/cameras/<int:cam_id>/toggle', methods=['PUT'])
+@jwt_required()
+def toggle_camera_field(cam_id):
+    data = request.get_json() or {}
+    field = data.get('field')
+    if field not in ('reid', 'gender_age', 'activate'):
+        return jsonify({"success": False, "message": "Invalid field"}), 400
+    value = 1 if data.get('value') else 0
+    conn = get_connection()
+    row = conn.execute("SELECT store_name FROM cameras WHERE id=?", (cam_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"success": False, "message": "Camera not found"}), 404
+    claims = get_jwt()
+    if not claims.get("is_admin", False) and row['store_name'] != get_jwt_identity():
+        conn.close()
+        return jsonify({"success": False, "message": "Forbidden"}), 403
+    conn.execute(f"UPDATE cameras SET {field}=? WHERE id=?", (value, cam_id))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "field": field, "value": bool(value)})
 @app.route('/api/cameras/<int:cam_id>', methods=['DELETE'])
 @jwt_required()
 def delete_camera(cam_id):
