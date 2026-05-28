@@ -1475,7 +1475,7 @@ def init_db(db_path):
         store_name TEXT, timestamp TEXT, cam_id TEXT, track_id INTEGER, gender TEXT, age_group TEXT, raw_age REAL, event TEXT)"""
     )
     c.execute(
-        """CREATE TABLE IF NOT EXISTS footfall (id INTEGER PRIMARY KEY AUTOINCREMENT,
+        """CREATE TABLE IF NOT EXISTS footfall (id INTEGER PRIMARY KEY AUTOINCREMENT,store_name TEXT,
         timestamp TEXT, cam_id TEXT, track_id INTEGER, type TEXT)"""
     )
     c.execute(
